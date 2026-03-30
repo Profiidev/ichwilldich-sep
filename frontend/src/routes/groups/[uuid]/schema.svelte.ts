@@ -13,7 +13,7 @@ export const groupSettings = z.object({
   group_view: z.boolean().default(false),
   group_edit: z.boolean().default(false),
   user_view: z.boolean().default(false),
-  user_edit: z.boolean().default(false),
+  user_edit: z.boolean().default(false)
 });
 
 export const reformatData = (

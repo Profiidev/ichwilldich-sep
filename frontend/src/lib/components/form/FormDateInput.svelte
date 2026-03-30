@@ -72,7 +72,7 @@
             onValueChange={(val) => {
               formData.set({
                 ...get(formData),
-                exp:
+                [key]:
                   val instanceof CalendarDate
                     ? val.toDate(getLocalTimeZone())
                     : null

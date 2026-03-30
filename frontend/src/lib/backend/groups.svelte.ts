@@ -105,4 +105,3 @@ export const simpleUserList = async (
     return ret;
   }
 };
-

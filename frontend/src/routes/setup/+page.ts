@@ -10,6 +10,6 @@ export const load: PageLoad = async ({ fetch }) => {
   }
 
   return {
-    db_backend: status?.db_backend ?? 'unknown',
+    db_backend: status?.db_backend ?? 'unknown'
   };
 };

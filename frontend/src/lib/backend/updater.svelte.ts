@@ -7,15 +7,12 @@ export enum UpdateType {
   User = 'User',
   UserPermissions = 'UserPermissions',
   Group = 'Group',
-  Token = 'Token',
+  Token = 'Token'
 }
 
 export type UpdateMessage =
   | {
-      type:
-        | UpdateType.User
-        | UpdateType.Group
-        | UpdateType.Token
+      type: UpdateType.User | UpdateType.Group | UpdateType.Token;
       uuid: string;
     }
   | {

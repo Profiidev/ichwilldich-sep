@@ -1,0 +1,20 @@
+name: 'Create GH Release'
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          token: ${{ secrets.PERSONAL_TOKEN }}
+          name: Ichwilldich SEP ${{ github.ref_name }}
+          body: |
+            Ichwilldich SEP version ${{ github.ref_name }} has been released!
+          generate_release_notes: true

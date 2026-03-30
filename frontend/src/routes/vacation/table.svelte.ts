@@ -1,10 +1,14 @@
 import type { ColumnDef } from '@tanstack/table-core';
 import * as DataTable from 'positron-components/components/ui/data-table';
-import { createColumn } from 'positron-components/components/table/helpers.svelte';
+import {
+  createColumn,
+  createColumnHeader
+} from 'positron-components/components/table/helpers.svelte';
 import { Permission } from '$lib/permissions.svelte';
 import { type UserInfo } from '$lib/backend/user.svelte';
 import { ApprovalState, type Vacation } from '$lib/backend/vacation.svelte';
 import Actions from './Actions.svelte';
+import Status from './Status.svelte';
 
 export const columns = ({
   deleteVacation,
@@ -25,7 +29,15 @@ export const columns = ({
   createColumn('end_date', 'End Date', (value: string) =>
     new Date(value).toLocaleString(navigator.languages || [navigator.language])
   ),
-  createColumn('approval', 'Status'),
+  {
+    ...createColumnHeader('approval', 'Status'),
+    cell: ({ row }) => {
+      let status = row.getValue<ApprovalState>('approval');
+      return DataTable.renderComponent(Status, {
+        status
+      });
+    }
+  },
   createColumn('user', 'User'),
   createColumn('uuid', 'UUID'),
   {

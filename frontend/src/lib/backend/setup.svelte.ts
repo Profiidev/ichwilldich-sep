@@ -15,7 +15,6 @@ export interface SetupPayload {
 export interface SetupStatus {
   is_setup: boolean;
   db_backend: 'PostgreSQL' | 'MySQL' | 'SQLite';
-  storage_backend: 'Local' | 'S3';
 }
 
 export const getSetupStatus = async (

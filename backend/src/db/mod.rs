@@ -8,6 +8,7 @@ use crate::db::key::KeyTable;
 use crate::db::settings::SettingsTable;
 use crate::db::setup::SetupTable;
 use crate::db::user::UserTable;
+use crate::db::vacation::VacationTable;
 
 pub mod group;
 pub mod invalid_jwt;
@@ -15,6 +16,7 @@ pub mod key;
 pub mod settings;
 pub mod setup;
 pub mod user;
+pub mod vacation;
 
 pub trait DBTrait {
   fn key(&self) -> KeyTable<'_>;
@@ -23,6 +25,7 @@ pub trait DBTrait {
   fn group(&self) -> GroupTable<'_>;
   fn user(&self) -> UserTable<'_>;
   fn settings(&self) -> SettingsTable<'_>;
+  fn vacation(&self) -> VacationTable<'_>;
 }
 
 impl DBTrait for Connection {
@@ -48,6 +51,10 @@ impl DBTrait for Connection {
 
   fn settings(&self) -> SettingsTable<'_> {
     SettingsTable::new(self)
+  }
+
+  fn vacation(&self) -> VacationTable<'_> {
+    VacationTable::new(self)
   }
 }
 

@@ -6,6 +6,7 @@ pub fn permissions() -> Vec<&'static str> {
     GroupEdit::name(),
     UserView::name(),
     UserEdit::name(),
+    VacationManage::name(),
   ]
 }
 
@@ -39,3 +40,5 @@ permission!(GroupEdit, "group:edit");
 // Users
 permission!(UserView, "user:view");
 permission!(UserEdit, "user:edit");
+
+permission!(VacationManage, "vacation:manage");

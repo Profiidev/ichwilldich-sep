@@ -30,7 +30,9 @@
     } else {
       toast.success('Vacation created successfully.');
       invalidate((url) => url.pathname.startsWith('/api/vacation'));
-      goto('/vacation');
+      setTimeout(() => {
+        goto('/vacation');
+      });
     }
   };
 </script>

@@ -26,16 +26,16 @@
       class="ml-auto cursor-pointer"
       onclick={deny}
     >
-      <X />
+      <X class="text-red-600" />
     </Button>
     <Button
       size="icon"
       variant="secondary"
       {disabled}
-      class="ml-auto cursor-pointer"
+      class="cursor-pointer"
       onclick={approve}
     >
-      <Check />
+      <Check class="text-green-600" />
     </Button>
   {:else}
     <Button

@@ -3,7 +3,7 @@ use axum::{
   extract::FromRequest,
   routing::{delete, get, post, put},
 };
-use centaurus::{db::init::Connection, error::Result};
+use centaurus::{bail, db::init::Connection, error::Result};
 use chrono::{DateTime, Utc};
 use entity::sea_orm_active_enums::ApprovalState;
 use serde::{Deserialize, Serialize};
@@ -45,6 +45,10 @@ async fn create_vacation(
   db: Connection,
   req: CreateVacationRequest,
 ) -> Result<Json<CreateVacationRes>> {
+  if req.end_date < req.start_date {
+    bail!("End date must be after start date");
+  }
+
   let model = db
     .vacation()
     .create_vacation(auth.user_id, req.start_date, req.end_date)

@@ -19,8 +19,12 @@ export const columns = ({
   resetVacation: (user: Vacation) => void;
   user?: UserInfo;
 }): ColumnDef<Vacation>[] => [
-  createColumn('start_date', 'Start Date'),
-  createColumn('end_date', 'End Date'),
+  createColumn('start_date', 'Start Date', (value: string) =>
+    new Date(value).toLocaleString(navigator.languages || [navigator.language])
+  ),
+  createColumn('end_date', 'End Date', (value: string) =>
+    new Date(value).toLocaleString(navigator.languages || [navigator.language])
+  ),
   createColumn('approval', 'Status'),
   createColumn('user', 'User'),
   createColumn('uuid', 'UUID'),

@@ -20,7 +20,7 @@ centaurus = { version = "0.4.13", features = [
   "url",
   "image",
 ] }
-uuid = { version = "1.22.0", features = ["v4"] }
+uuid = { version = "1.23.0", features = ["v4"] }
 entity = { path = "entity" }
 migration = { path = "migration" }
 sea-orm = { version = "1.1.19", features = [
@@ -46,7 +46,7 @@ argon2 = "0.5.3"
 jsonwebtoken = { version = "10.3.0", features = ["rust_crypto"] }
 time = "0.3.47"
 url = { version = "2.5.8", features = ["serde"] }
-lettre = { version = "0.11.19", default-features = false, features = [
+lettre = { version = "0.11.20", default-features = false, features = [
   "smtp-transport",
   "rustls",
   "builder",

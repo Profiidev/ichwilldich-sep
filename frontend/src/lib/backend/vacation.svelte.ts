@@ -7,9 +7,9 @@ import {
 } from 'positron-components/backend';
 
 export enum ApprovalState {
-  Approved = 'approved',
-  Rejected = 'rejected',
-  Pending = 'pending'
+  Approved = 'Approved',
+  Rejected = 'Rejected',
+  Pending = 'Pending'
 }
 
 export interface Vacation {

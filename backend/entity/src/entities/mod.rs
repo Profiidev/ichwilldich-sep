@@ -7,6 +7,8 @@ pub mod group_permission;
 pub mod group_user;
 pub mod invalid_jwt;
 pub mod key;
+pub mod sea_orm_active_enums;
 pub mod settings;
 pub mod setup;
 pub mod user;
+pub mod vacation;

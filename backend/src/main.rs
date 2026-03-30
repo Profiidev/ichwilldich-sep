@@ -24,6 +24,7 @@ mod rate_limit;
 mod settings;
 mod setup;
 mod user;
+mod vacation;
 mod ws;
 
 #[tokio::main]
@@ -56,6 +57,7 @@ fn api_router(rate_limiter: &mut RateLimiter) -> Router {
     .nest("/settings", settings::router())
     .nest("/mail", mail::router(rate_limiter))
     .nest("/group", group::router())
+    .nest("/vacation", vacation::router())
 }
 
 async fn state(router: Router, config: Config) -> Router {

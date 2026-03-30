@@ -1,11 +1,9 @@
 import Settings from '@lucide/svelte/icons/settings';
-import House from '@lucide/svelte/icons/house';
 import { Permission } from '$lib/permissions.svelte';
 import type { Component } from 'svelte';
 import Users from '@lucide/svelte/icons/users';
 import User from '@lucide/svelte/icons/user';
-import KeyRound from '@lucide/svelte/icons/key-round';
-import DatabaseZap from '@lucide/svelte/icons/database-zap';
+import TreePalm from '@lucide/svelte/icons/tree-palm';
 
 export interface NavGroup {
   label: string;
@@ -20,6 +18,16 @@ export interface NavItem {
 }
 
 export const items: NavGroup[] = [
+  {
+    label: 'Time Management',
+    items: [
+      {
+        label: 'Vacation',
+        href: '/vacation',
+        icon: TreePalm
+      }
+    ]
+  },
   {
     label: 'Administration',
     items: [

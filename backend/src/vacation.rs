@@ -13,6 +13,7 @@ use crate::{
   auth::jwt_auth::JwtAuth,
   db::{DBTrait, vacation::Vacation},
   permissions::VacationManage,
+  ws::state::{UpdateMessage, Updater},
 };
 
 pub fn router() -> Router {
@@ -43,6 +44,7 @@ struct CreateVacationRes {
 async fn create_vacation(
   auth: JwtAuth,
   db: Connection,
+  updater: Updater,
   req: CreateVacationRequest,
 ) -> Result<Json<CreateVacationRes>> {
   if req.end_date < req.start_date {
@@ -53,6 +55,9 @@ async fn create_vacation(
     .vacation()
     .create_vacation(auth.user_id, req.start_date, req.end_date)
     .await?;
+  updater
+    .broadcast(UpdateMessage::Vacation { uuid: model.id })
+    .await;
   Ok(Json(CreateVacationRes { uuid: model.id }))
 }
 
@@ -65,9 +70,13 @@ struct DeleteVacationRequest {
 async fn delete_vacation(
   _auth: JwtAuth<VacationManage>,
   db: Connection,
+  updater: Updater,
   req: DeleteVacationRequest,
 ) -> Result<()> {
   db.vacation().delete_vacation(req.uuid).await?;
+  updater
+    .broadcast(UpdateMessage::Vacation { uuid: req.uuid })
+    .await;
   Ok(())
 }
 
@@ -81,10 +90,14 @@ struct SetVacationStateRequest {
 async fn set_vacation_state(
   _auth: JwtAuth<VacationManage>,
   db: Connection,
+  updater: Updater,
   req: SetVacationStateRequest,
 ) -> Result<()> {
   db.vacation()
     .set_vacation_state(req.uuid, req.state)
     .await?;
+  updater
+    .broadcast(UpdateMessage::Vacation { uuid: req.uuid })
+    .await;
   Ok(())
 }

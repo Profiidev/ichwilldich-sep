@@ -1,31 +1,27 @@
 import type { ColumnDef } from '@tanstack/table-core';
-import * as DataTable from 'positron-components/components/ui/data-table';
-import { createColumn } from 'positron-components/components/table/helpers.svelte';
-import Actions from '$lib/components/table/Actions.svelte';
-import { Permission } from '$lib/permissions.svelte';
-import {
-  type SimpleGroupInfo,
-  type UserInfo,
-  type UserListInfo
-} from '$lib/backend/user.svelte';
-import SimpleAvatar from 'positron-components/components/util/simple-avatar.svelte';
+import * as DataTable from '@profidev/pleiades/components/ui/data-table';
+import { createColumn } from '@profidev/pleiades/components/table/helpers.svelte';
+import type { SimpleGroupInfo, UserListInfo } from '$lib/client';
+import Actions from '@profidev/pleiades/components/table/actions.svelte';
+import SimpleAvatar from '$lib/components/SimpleAvatar.svelte';
+import { avatarUrl } from '$lib/permissions.svelte';
 
 export const columns = ({
   deleteUser,
-  user
+  canEdit
 }: {
   deleteUser: (user: UserListInfo) => void;
-  user?: UserInfo;
+  canEdit: boolean;
 }): ColumnDef<UserListInfo>[] => [
   {
     accessorKey: 'avatar',
+    cell: ({ row }) =>
+      DataTable.renderComponent(SimpleAvatar, {
+        alt: row.original.name,
+        class: 'size-8',
+        src: `${avatarUrl}/${row.original.uuid}`
+      }),
     header: () => {},
-    cell: ({ row }) => {
-      return DataTable.renderComponent(SimpleAvatar, {
-        src: row.getValue('avatar') as string,
-        class: 'size-8'
-      });
-    },
     size: 10
   },
   createColumn('name', 'Name'),
@@ -39,17 +35,14 @@ export const columns = ({
   createColumn('uuid', 'UUID'),
   {
     accessorKey: 'actions',
-    header: () => {},
-    cell: ({ row }) => {
-      let disabled = !user?.permissions.includes(Permission.USER_EDIT);
-
-      return DataTable.renderComponent(Actions, {
-        edit_disabled: disabled,
-        delete_disabled: disabled,
-        editHref: `/users/${row.original.uuid}`,
+    cell: ({ row }) =>
+      DataTable.renderComponent(Actions, {
+        delete_disabled: !canEdit,
+        edit: `/users/${row.original.uuid}`,
+        edit_disabled: !canEdit,
         remove: () => deleteUser(row.original)
-      });
-    },
-    enableHiding: false
+      }),
+    enableHiding: false,
+    header: () => {}
   }
 ];

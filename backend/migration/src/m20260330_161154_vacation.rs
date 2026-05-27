@@ -1,10 +1,9 @@
+use centaurus::db::migrations::m3_user::User;
 use sea_orm_migration::{
   prelude::{extension::postgres::Type, *},
   schema::*,
   sea_orm::DatabaseBackend,
 };
-
-use crate::m20260123_144752_user::User;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;

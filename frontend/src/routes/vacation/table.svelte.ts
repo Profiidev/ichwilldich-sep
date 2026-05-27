@@ -1,14 +1,13 @@
 import type { ColumnDef } from '@tanstack/table-core';
-import * as DataTable from 'positron-components/components/ui/data-table';
+import * as DataTable from '@profidev/pleiades/components/ui/data-table';
 import {
   createColumn,
   createColumnHeader
-} from 'positron-components/components/table/helpers.svelte';
+} from '@profidev/pleiades/components/table/helpers.svelte';
 import { Permission } from '$lib/permissions.svelte';
-import { type UserInfo } from '$lib/backend/user.svelte';
-import { ApprovalState, type Vacation } from '$lib/backend/vacation.svelte';
 import Actions from './Actions.svelte';
 import Status from './Status.svelte';
+import { ApprovalState, type UserInfo, type Vacation } from '$lib/client';
 
 export const columns = ({
   deleteVacation,
@@ -32,7 +31,7 @@ export const columns = ({
   {
     ...createColumnHeader('approval', 'Status'),
     cell: ({ row }) => {
-      let status = row.getValue<ApprovalState>('approval');
+      const status = row.getValue<ApprovalState>('approval');
       return DataTable.renderComponent(Status, {
         status
       });
@@ -42,19 +41,19 @@ export const columns = ({
   createColumn('uuid', 'UUID'),
   {
     accessorKey: 'actions',
-    header: () => {},
     cell: ({ row }) => {
-      let disabled = !user?.permissions.includes(Permission.VACATION_MANAGE);
+      const disabled = !user?.permissions.includes(Permission.VACATION_MANAGE);
 
       return DataTable.renderComponent(Actions, {
-        disabled,
-        remove: () => deleteVacation(row.original),
         approve: () => approveVacation(row.original),
         deny: () => rejectVacation(row.original),
-        pending: row.original.approval === ApprovalState.Pending,
+        disabled,
+        pending: row.original.approval === ApprovalState.PENDING,
+        remove: () => deleteVacation(row.original),
         reset: () => resetVacation(row.original)
       });
     },
-    enableHiding: false
+    enableHiding: false,
+    header: () => {}
   }
 ];

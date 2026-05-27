@@ -1,7 +1,8 @@
 services:
   frontend:
-    image: ghcr.io/profiidev/images/node-alpine-dev:main
+    image: ghcr.io/profiidev/images/node-gnu-dev:main@sha256:98071687039dfc38aea9dd691f6c555b58f4758b782234eea4cd989c2d47903d
     restart: unless-stopped
+    user: '${HOST_UID:-0}:${HOST_GID:-0}'
     volumes:
       - ./frontend:/app/frontend
       - ./node_modules:/app/node_modules
@@ -17,7 +18,8 @@ services:
     #command: npm i
 
   backend:
-    image: ghcr.io/profiidev/images/rust-musl-watch:main
+    image: ghcr.io/profiidev/images/rust-musl-watch:main@sha256:0d38b2e2239495eb551af4208acf213e40e551489ec8ca9386d16db987f21a61
+    user: '${HOST_UID:-0}:${HOST_GID:-0}'
     restart: unless-stopped
     volumes:
       - ./.cargo:/app/.cargo
@@ -34,10 +36,10 @@ services:
         condition: service_healthy
 
   postgres:
-    image: postgres:17
+    image: postgres:18@sha256:8ff36f3c66371cba71d20ceedccfc3de9669a68737607888c4ef0af93abe8e39
     restart: unless-stopped
     volumes:
-      - ./postgres:/var/lib/postgresql/data
+      - ./postgres:/var/lib/postgresql
     environment:
       - POSTGRES_PASSWORD=test
       - POSTGRES_USER=test

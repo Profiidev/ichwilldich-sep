@@ -1,8 +1,10 @@
-import { listVacations } from '$lib/backend/vacation.svelte';
+import { listVacations } from '$lib/client';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ fetch }) => {
-  let vacations = await listVacations(fetch);
+export const load: PageLoad = ({ fetch }) => {
+  const vacations = listVacations({
+    fetch
+  }).then(({ data }) => data);
   return {
     vacations
   };

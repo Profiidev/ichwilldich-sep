@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { toast } from 'positron-components/components/util/general';
-  import type { Stage } from '$lib/components/form/types.svelte';
-  import MultiStepForm from '$lib/components/form/MultiStepForm.svelte';
+  import { toast } from '@profidev/pleiades/components/util/general';
   import Information from './Information.svelte';
-  import { createVacation } from '$lib/backend/vacation.svelte';
   import { goto, invalidate } from '$app/navigation';
+  import type { Stage } from '@profidev/pleiades/components/form/types';
+  import MultistepForm from '@profidev/pleiades/components/form/multistep-form.svelte';
+  import { createVacation } from '$lib/client';
 
   let stages: Stage[] = [
     {
@@ -23,9 +23,11 @@
       };
     }
 
-    let res = await createVacation(anyData);
+    let res = await createVacation({
+      body: anyData
+    });
 
-    if (typeof res === 'string') {
+    if (res.error) {
       return { error: 'Error creating vacation.' };
     } else {
       toast.success('Vacation created successfully.');
@@ -37,4 +39,4 @@
   };
 </script>
 
-<MultiStepForm {stages} onsubmit={submit} cancelHref="/vacation" />
+<MultistepForm {stages} onsubmit={submit} cancelHref="/vacation" />

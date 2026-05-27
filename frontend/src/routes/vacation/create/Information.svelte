@@ -1,8 +1,8 @@
 <script lang="ts">
-  import BaseForm from 'positron-components/components/form/base-form.svelte';
+  import BaseForm from '@profidev/pleiades/components/form/base-form.svelte';
+  import FormDateInput from '@profidev/pleiades/components/form/form-date-input.svelte';
   import { information } from './schema.svelte';
-  import type { StageProps } from '$lib/components/form/types.svelte';
-  import FormDateInput from '$lib/components/form/FormDateInput.svelte';
+  import type { StageProps } from '@profidev/pleiades/components/form/types';
 
   let { initialValue, onsubmit, footer, isLoading, data }: StageProps =
     $props();

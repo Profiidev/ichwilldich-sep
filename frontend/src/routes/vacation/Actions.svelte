@@ -3,7 +3,7 @@
   import Check from '@lucide/svelte/icons/check';
   import X from '@lucide/svelte/icons/x';
   import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
-  import { Button } from 'positron-components/components/ui/button';
+  import { Button } from '@profidev/pleiades/components/ui/button';
 
   interface Props {
     disabled: boolean;

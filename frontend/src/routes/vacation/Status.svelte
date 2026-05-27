@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ApprovalState } from '$lib/backend/vacation.svelte';
+  import { ApprovalState } from '$lib/client';
 
   interface Props {
     status: ApprovalState;
@@ -9,9 +9,9 @@
 </script>
 
 <p
-  class={status === ApprovalState.Approved
+  class={status === ApprovalState.APPROVED
     ? 'text-green-600'
-    : status === ApprovalState.Rejected
+    : status === ApprovalState.REJECTED
       ? 'text-red-600'
       : 'text-yellow-600'}
 >

@@ -7,3 +7,5 @@ export enum Permission {
   USER_EDIT = 'user:edit',
   VACATION_MANAGE = 'vacation:manage'
 }
+
+export const avatarUrl = '/api/user/info/avatar';

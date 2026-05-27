@@ -53,11 +53,11 @@ impl Default for Config {
       oidc: UserSettings::default(),
       db_url: "".to_string(),
       metrics: MetricsConfig {
-        metrics_name: "{{project-name}}".to_string(),
+        metrics_name: "Ichwilldich SEP".to_string(),
         ..Default::default()
       },
       auth: AuthConfig {
-        auth_pepper: "__{{project-name}}_PEPPER__".to_string(),
+        auth_pepper: "__Ichwilldich SEP_PEPPER__".to_string(),
         ..Default::default()
       },
     }

@@ -1,14 +1,13 @@
+use centaurus::{backend::auth::permission::Permission, db::tables::group::GroupTable};
 use chrono::Utc;
 use entity::{prelude::*, sea_orm_active_enums::ApprovalState, vacation};
+use schemars::JsonSchema;
 use sea_orm::{ActiveValue::Set, IntoActiveModel, prelude::*};
 use serde::Serialize;
 
-use crate::{
-  db::group::GroupTable,
-  permissions::{Permission, VacationManage},
-};
+use crate::utils::VacationManage;
 
-#[derive(Serialize)]
+#[derive(Serialize, JsonSchema)]
 pub struct Vacation {
   uuid: Uuid,
   start_date: chrono::DateTime<Utc>,
@@ -26,7 +25,7 @@ impl<'db> VacationTable<'db> {
     Self { db }
   }
 
-  pub async fn list_vacations(&self, user: Uuid) -> Result<Vec<Vacation>, DbErr> {
+  pub async fn list_vacations(&self, user: Uuid) -> centaurus::error::Result<Vec<Vacation>> {
     let all = GroupTable::new(self.db)
       .user_hash_permissions(user, VacationManage::name())
       .await?;

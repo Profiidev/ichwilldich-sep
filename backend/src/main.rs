@@ -1,31 +1,27 @@
-use axum::{Extension, Router};
+use aide::axum::ApiRouter;
+use axum::Extension;
 use centaurus::{
-  db::init::init_db,
-  init::{
-    axum::{listener_setup, run_app_connect_info},
-    logging::init_logging,
-    router::base_router,
+  backend::{
+    auth,
+    endpoints::{group, mail, settings, setup, user, websocket},
+    init::{listener_setup, run_app_connect_info},
+    middleware::rate_limiter::RateLimiter,
+    router::build_router,
   },
+  db::init::init_db,
+  logging::init_logging,
+  version_header,
 };
 #[cfg(debug_assertions)]
 use dotenvy::dotenv;
 use tracing::info;
 
-use crate::{config::Config, rate_limit::RateLimiter};
+use crate::{config::Config, utils::UpdateMessage};
 
-mod auth;
 mod config;
 mod db;
-mod gravatar;
-mod group;
-mod mail;
-mod permissions;
-mod rate_limit;
-mod settings;
-mod setup;
-mod user;
+mod utils;
 mod vacation;
-mod ws;
 
 #[tokio::main]
 async fn main() {
@@ -36,40 +32,35 @@ async fn main() {
   init_logging(config.base.log_level);
 
   let listener = listener_setup(config.base.port).await;
-  let mut rate_limiter = RateLimiter::default();
-
-  let mut router = api_router(&mut rate_limiter);
-  router = base_router(router, &config.base, &config.metrics).await;
-  let app = state(router, config.clone()).await;
-
-  rate_limiter.init();
+  let mut app = build_router(api_router, state, config).await;
+  version_header!(app);
 
   info!("Starting application");
   run_app_connect_info(listener, app).await;
 }
 
-fn api_router(rate_limiter: &mut RateLimiter) -> Router {
-  Router::new()
-    .nest("/ws", ws::router())
+fn api_router(rate_limiter: &mut RateLimiter) -> ApiRouter {
+  ApiRouter::new()
+    .nest("/ws", websocket::router::<UpdateMessage>())
     .nest("/setup", setup::router())
-    .nest("/auth", auth::router(rate_limiter))
-    .nest("/user", user::router(rate_limiter))
-    .nest("/settings", settings::router())
+    .nest("/auth", auth::router::<UpdateMessage>(rate_limiter))
+    .nest("/user", user::router::<UpdateMessage>(rate_limiter))
+    .nest("/settings", settings::router::<UpdateMessage>())
     .nest("/mail", mail::router(rate_limiter))
-    .nest("/group", group::router())
+    .nest("/group", group::router::<UpdateMessage>())
     .nest("/vacation", vacation::router())
 }
 
-async fn state(router: Router, config: Config) -> Router {
+async fn state(mut router: ApiRouter, config: Config) -> ApiRouter {
   let db = init_db::<migration::Migrator>(&config.db, &config.db_url).await;
-  db::init(&db).await.expect("Failed to initialize database");
-  setup::create_admin_group(&db)
+  centaurus::backend::endpoints::setup::create_admin_group(&db, utils::permissions())
     .await
     .expect("Failed to create admin group");
 
-  let (mut router, _) = ws::state(router).await;
+  router = user::state(router);
   router = auth::state(router, &config, &db).await;
-  router = mail::state(router, &db).await;
+  router = mail::state(router, &db, &config).await;
+  router = websocket::state::<UpdateMessage>(router).await;
 
-  router.layer(Extension(db)).layer(Extension(config))
+  router.layer(Extension(db))
 }

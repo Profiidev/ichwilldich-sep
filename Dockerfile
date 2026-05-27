@@ -5,10 +5,10 @@ ARG RUST_ARCH=${RUST_ARCH/arm64/aarch64}
 ARG TARGET=${RUST_ARCH}-unknown-linux-gnu
 ARG RUSTFLAGS="-C target-feature=+crt-static --cfg reqwest_unstable"
 ARG FRONTEND_DIR=/app/frontend
-ARG FRONTEND_URL="http://localhost:3000"
+ARG FRONTEND_URL="http://localhost:3000/"
 ARG BACKEND_URL="http://localhost:8000"
 
-FROM node:24-alpine AS frontend-builder
+FROM node:26-slim@sha256:1e738cb88890a15c71880323fbc35a739b7bbc703d72e8bfd1613128f8182f78 AS frontend-builder
 
 WORKDIR /app/frontend
 
@@ -26,7 +26,7 @@ COPY frontend/static ./static
 
 RUN npm run build
 
-FROM ghcr.io/profiidev/images/rust-gnu-builder:main AS backend-planner
+FROM ghcr.io/profiidev/images/rust-gnu-builder:main@sha256:ef174ceced5263e76cec3fe70748558c69f3049c134425bb0b623b728cb6c5c9 AS backend-planner
 
 ARG TARGET
 ARG RUSTFLAGS
@@ -36,18 +36,17 @@ COPY backend/entity/Cargo.toml backend/entity/
 COPY backend/migration/Cargo.toml backend/migration/
 COPY ./Cargo.lock ./Cargo.toml ./
 
-RUN sed -i '/^members = /c\members = ["backend", "backend/entity", "backend/migration"]' Cargo.toml
-
 RUN \
   --mount=type=cache,target=/usr/local/cargo/registry \
   --mount=type=cache,target=/app/target \
   cargo chef prepare --recipe-path recipe.json --bin backend
 
-FROM ghcr.io/profiidev/images/rust-gnu-builder:main AS backend-builder
+FROM ghcr.io/profiidev/images/rust-gnu-builder:main@sha256:ef174ceced5263e76cec3fe70748558c69f3049c134425bb0b623b728cb6c5c9 AS backend-builder
 
 ARG TARGET
 ARG RUSTFLAGS
 ARG FRONTEND_DIR
+ARG FRONTEND_URL
 
 COPY --from=backend-planner /app/recipe.json .
 
@@ -64,22 +63,18 @@ COPY backend/migration/Cargo.toml backend/migration/
 COPY backend/migration/src backend/migration/src
 COPY ./Cargo.lock ./Cargo.toml ./
 
-RUN sed -i '/^members = /c\members = ["backend", "backend/entity", "backend/migration"]' Cargo.toml
-
 RUN \
   --mount=type=cache,target=/usr/local/cargo/registry \
   --mount=type=cache,target=/app/target \
   cd backend && cargo build --release --target $TARGET \
   && mv ../target/$TARGET/release/backend ../app
 
-FROM node:24-alpine
-
-ARG FRONTEND_DIR
+FROM node:26-slim@sha256:1e738cb88890a15c71880323fbc35a739b7bbc703d72e8bfd1613128f8182f78
 
 ENV DB_URL="sqlite:/data/ichwilldich-sep.db?mode=rwc"
-ENV STORAGE_PATH="/data/storage"
 ENV SITE_URL="http://localhost:8000"
-RUN mkdir -p /data/storage
+
+RUN mkdir -p /data
 
 COPY --from=backend-builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 

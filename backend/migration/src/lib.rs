@@ -1,12 +1,5 @@
 pub use sea_orm_migration::prelude::*;
 
-mod m20250301_215149_create_key_table;
-mod m20260123_144736_invalid_jwt;
-mod m20260123_144752_user;
-mod m20260126_155842_group;
-mod m20260126_160754_setup;
-mod m20260127_211643_settings;
-mod m20260129_154755_user_avatar;
 mod m20260330_161154_vacation;
 
 pub struct Migrator;
@@ -15,13 +8,12 @@ pub struct Migrator;
 impl MigratorTrait for Migrator {
   fn migrations() -> Vec<Box<dyn MigrationTrait>> {
     vec![
-      Box::new(m20250301_215149_create_key_table::Migration),
-      Box::new(m20260123_144736_invalid_jwt::Migration),
-      Box::new(m20260123_144752_user::Migration),
-      Box::new(m20260126_155842_group::Migration),
-      Box::new(m20260126_160754_setup::Migration),
-      Box::new(m20260127_211643_settings::Migration),
-      Box::new(m20260129_154755_user_avatar::Migration),
+      Box::new(centaurus::db::migrations::m0_key::Migration),
+      Box::new(centaurus::db::migrations::m1_invalid_jwt::Migration),
+      Box::new(centaurus::db::migrations::m2_settings::Migration),
+      Box::new(centaurus::db::migrations::m3_user::Migration),
+      Box::new(centaurus::db::migrations::m4_groups::Migration),
+      Box::new(centaurus::db::migrations::m5_setup::Migration),
       Box::new(m20260330_161154_vacation::Migration),
     ]
   }

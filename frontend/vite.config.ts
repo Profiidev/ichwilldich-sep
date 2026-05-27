@@ -7,9 +7,6 @@ export default defineConfig({
   define: {
     __version__: JSON.stringify(process.env.npm_package_version)
   },
-  define: {
-    __version__: JSON.stringify(process.env.npm_package_version)
-  },
   plugins: [enhancedImages(), tailwindcss(), sveltekit()],
   server: {
     hmr: {

@@ -12,13 +12,15 @@ pub struct Model {
   pub email: String,
   pub password: String,
   pub salt: String,
-  pub avatar: Option<String>,
+  pub oidc_user: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
   #[sea_orm(has_many = "super::group_user::Entity")]
   GroupUser,
+  #[sea_orm(has_one = "super::user_avatar::Entity")]
+  UserAvatar,
   #[sea_orm(has_many = "super::vacation::Entity")]
   Vacation,
 }
@@ -26,6 +28,12 @@ pub enum Relation {
 impl Related<super::group_user::Entity> for Entity {
   fn to() -> RelationDef {
     Relation::GroupUser.def()
+  }
+}
+
+impl Related<super::user_avatar::Entity> for Entity {
+  fn to() -> RelationDef {
+    Relation::UserAvatar.def()
   }
 }
 

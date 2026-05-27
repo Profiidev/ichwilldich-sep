@@ -1,5 +1,5 @@
 import Settings from '@lucide/svelte/icons/settings';
-import House from '@lucide/svelte/icons/house';
+import TreePalm from '@lucide/svelte/icons/tree-palm';
 import { Permission } from '$lib/permissions.svelte';
 import Users from '@lucide/svelte/icons/users';
 import User from '@lucide/svelte/icons/user';
@@ -7,8 +7,14 @@ import type { NavGroup } from '@profidev/pleiades/components/nav/sidebar/types';
 
 export const items: NavGroup[] = [
   {
-    items: [{ href: '/', icon: House, label: 'Overview' }],
-    label: 'Overview'
+    items: [
+      {
+        href: '/vacation',
+        icon: TreePalm,
+        label: 'Vacation'
+      }
+    ],
+    label: 'Time Management'
   },
   {
     items: [

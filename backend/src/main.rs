@@ -3,7 +3,7 @@ use axum::Extension;
 use centaurus::{
   backend::{
     auth,
-    endpoints::{group, mail, settings, setup, user, websocket},
+    endpoints::{group, mail, setup, user, websocket},
     init::{listener_setup, run_app_connect_info},
     middleware::rate_limiter::RateLimiter,
     router::build_router,
@@ -20,6 +20,7 @@ use crate::{config::Config, utils::UpdateMessage};
 
 mod config;
 mod db;
+mod settings;
 mod utils;
 mod vacation;
 
@@ -45,7 +46,7 @@ fn api_router(rate_limiter: &mut RateLimiter) -> ApiRouter {
     .nest("/setup", setup::router())
     .nest("/auth", auth::router::<UpdateMessage>(rate_limiter))
     .nest("/user", user::router::<UpdateMessage>(rate_limiter))
-    .nest("/settings", settings::router::<UpdateMessage>())
+    .nest("/settings", settings::router())
     .nest("/mail", mail::router(rate_limiter))
     .nest("/group", group::router::<UpdateMessage>())
     .nest("/vacation", vacation::router())

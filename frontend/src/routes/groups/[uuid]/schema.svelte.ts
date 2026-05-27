@@ -1,38 +1,35 @@
-import type {
-  GroupDetails,
-  GroupEditRequest
-} from '$lib/backend/groups.svelte';
-import type { FormValue } from 'positron-components/components/form/types';
+import type { EditGroupRequest, GroupDetails } from '$lib/client';
+import type { FormValue } from '@profidev/pleiades/components/form/types';
 import { z } from 'zod';
 
 export const groupSettings = z.object({
+  group$edit: z.boolean().default(false),
+  group$view: z.boolean().default(false),
   name: z.string().min(1, 'Group name is required'),
-  users: z.array(z.string()),
-  settings_view: z.boolean().default(false),
-  settings_edit: z.boolean().default(false),
-  group_view: z.boolean().default(false),
-  group_edit: z.boolean().default(false),
-  user_view: z.boolean().default(false),
-  user_edit: z.boolean().default(false)
+  settings$edit: z.boolean().default(false),
+  settings$view: z.boolean().default(false),
+  user$edit: z.boolean().default(false),
+  user$view: z.boolean().default(false),
+  users: z.array(z.string())
 });
 
 export const reformatData = (
   data: FormValue<typeof groupSettings>,
   uuid: string
-): GroupEditRequest => {
+): EditGroupRequest => {
   const permissions: string[] = [];
 
   for (const [key, value] of Object.entries(data)) {
     if (key !== 'name' && value === true) {
-      permissions.push(key.replace('_', ':'));
+      permissions.push(key.replace('$', ':'));
     }
   }
 
   return {
-    uuid,
     name: data.name,
     permissions,
-    users: data.users || []
+    users: data.users || [],
+    uuid
   };
 };
 
@@ -40,18 +37,17 @@ export const formatData = (
   group: GroupDetails
 ): FormValue<typeof groupSettings> => {
   const formattedData: FormValue<typeof groupSettings> = {
+    // oxlint-disable-next-line no-unsafe-type-assertion
+    ...(Object.fromEntries(
+      Object.keys(groupSettings.shape).map((key) => [key, false])
+    ) as unknown as FormValue<typeof groupSettings>),
     name: group.name,
-    settings_view: false,
-    settings_edit: false,
-    group_view: false,
-    group_edit: false,
-    user_view: false,
-    user_edit: false,
     users: group.users.map((user) => user.id)
   };
 
   for (const permission of group.permissions) {
-    const key = permission.replace(':', '_') as keyof FormValue<
+    // oxlint-disable-next-line no-unsafe-type-assertion
+    const key = permission.replace(':', '$') as keyof FormValue<
       typeof groupSettings
     >;
     // @ts-ignore

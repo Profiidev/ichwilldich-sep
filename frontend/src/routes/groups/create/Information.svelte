@@ -1,14 +1,15 @@
 <script lang="ts">
-  import BaseForm from 'positron-components/components/form/base-form.svelte';
-  import { type FormValue } from 'positron-components/components/form/types';
+  import BaseForm from '@profidev/pleiades/components/form/base-form.svelte';
+  import { type FormValue } from '@profidev/pleiades/components/form/types';
   import type { ComponentProps, Snippet } from 'svelte';
   import { information } from './schema.svelte';
-  import FormInput from 'positron-components/components/form/form-input.svelte';
+  import FormInput from '@profidev/pleiades/components/form/form-input.svelte';
 
   interface Props {
     initialValue?: FormValue<typeof information>;
-    onsubmit: ComponentProps<typeof BaseForm>['onsubmit'];
-    footer: Snippet<[{ isLoading: boolean }]>;
+    // @ts-ignore
+    onsubmit: ComponentProps<BaseForm<any>>['onsubmit'];
+    footer: Snippet<[{ isLoading: boolean; isError: boolean }]>;
     isLoading: boolean;
     readonly?: boolean;
   }

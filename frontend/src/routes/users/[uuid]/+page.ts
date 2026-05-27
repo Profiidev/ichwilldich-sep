@@ -1,35 +1,22 @@
-import { RequestError } from 'positron-components/backend';
 import type { PageLoad } from './$types';
-import { redirect } from '@sveltejs/kit';
-import {
-  getListUserInfo,
-  getMailStatus,
-  simpleGroupList
-} from '$lib/backend/user.svelte';
+import { listGroupsSimple, mailActive, userInfo } from '$lib/client';
 
-export const load: PageLoad = async ({ params, fetch }) => {
-  let resPromise = getListUserInfo(params.uuid, fetch);
-  let groupsPromise = simpleGroupList(fetch);
-  let mailPromise = getMailStatus(fetch);
-
-  let [res, groups, mail] = await Promise.all([
-    resPromise,
-    groupsPromise,
-    mailPromise
-  ]);
-
-  if (typeof res !== 'object') {
-    if (res === RequestError.NotFound) {
-      redirect(307, '/users?error=user_not_found');
-    } else {
-      redirect(307, '/users?error=user_other');
-    }
-  }
+export const load: PageLoad = ({ params, fetch }) => {
+  const resPromise = userInfo({
+    fetch,
+    path: { uuid: params.uuid }
+  });
+  const groupsPromise = listGroupsSimple({
+    fetch
+  }).then((res) => res.data ?? []);
+  const mailPromise = mailActive({ fetch }).then(
+    (res) => res.data?.active ?? false
+  );
 
   return {
-    uuid: params.uuid,
-    userInfo: res,
-    groups,
-    mailActive: mail?.active ?? false
+    groupsPromise,
+    mailActivePromise: mailPromise,
+    userInfoPromise: resPromise,
+    uuid: params.uuid
   };
 };

@@ -4,6 +4,7 @@ export enum Permission {
   GROUP_VIEW = 'group:view',
   GROUP_EDIT = 'group:edit',
   USER_VIEW = 'user:view',
-  USER_EDIT = 'user:edit',
-  VACATION_MANAGE = 'vacation:manage'
+  USER_EDIT = 'user:edit'
 }
+
+export const avatarUrl = '/api/user/info/avatar';

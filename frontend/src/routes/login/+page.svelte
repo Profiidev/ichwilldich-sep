@@ -1,69 +1,75 @@
 <script lang="ts">
-  import BaseForm from 'positron-components/components/form/base-form.svelte';
-  import FormInput from 'positron-components/components/form/form-input.svelte';
-  import { Button } from 'positron-components/components/ui/button';
-  import * as Card from 'positron-components/components/ui/card';
-  import { FieldSeparator } from 'positron-components/components/ui/field';
+  import BaseForm from '@profidev/pleiades/components/form/base-form.svelte';
+  import FormInput from '@profidev/pleiades/components/form/form-input.svelte';
+  import KeyRound from '@lucide/svelte/icons/key-round';
+  import { Button } from '@profidev/pleiades/components/ui/button';
+  import * as Card from '@profidev/pleiades/components/ui/card';
+  import { FieldSeparator } from '@profidev/pleiades/components/ui/field';
   import { login } from './schema.svelte';
-  import type { FormValue } from 'positron-components/components/form/types';
-  import { passwordLogin } from '$lib/backend/auth.svelte';
-  import { RequestError } from 'positron-components/backend';
+  import type { FormValue } from '@profidev/pleiades/components/form/types';
   import { goto, invalidate } from '$app/navigation';
   import { connectWebsocket } from '$lib/backend/updater.svelte';
-  import { toast } from 'positron-components/components/util/general';
-  import { SSOType } from '$lib/backend/sso.svelte';
-  import FormInputPassword from '$lib/components/form/FormInputPassword.svelte';
+  import { toast } from '@profidev/pleiades/components/util/general';
+  import FormInputPassword from '@profidev/pleiades/components/form/form-input-password.svelte';
+  import { getEncrypt, getOidcUrl } from '$lib/backend/auth.svelte';
+  import { Spinner } from '@profidev/pleiades/components/ui/spinner';
+  import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
+  import { authenticate, SsoType, type AuthConfig } from '$lib/client';
 
   let { data } = $props();
 
+  let isLoading = $state(false);
+  let config: AuthConfig | undefined = $state();
+  let oidcUrl: string | undefined = $state();
+  let oidcError: boolean = $state(false);
+
   $effect(() => {
-    const url = new URL(window.location.href);
-    let updated = false;
-    if (data.error) {
-      let error = '';
-      switch (data.error) {
-        case 'missing_code':
-          error = 'SSO login failed: Missing authorization code.';
-          break;
-        case 'oidc_not_configured':
-          error = 'SSO login failed: OIDC is not configured.';
-          break;
-        case 'user_not_found':
-          error = 'User not found.';
-          break;
-        default:
-          error = `SSO login failed: ${data.error}`;
+    data.config?.then(async (d) => {
+      config = d;
+
+      if (!oidcUrl) {
+        oidcUrl = await getOidcUrl();
+        if (config?.instant_redirect && oidcUrl && !data.skip) {
+          window.location.href = oidcUrl;
+        }
       }
-
-      toast.error(error);
-
-      url.searchParams.delete('error');
-      updated = true;
-    }
-    if (data.skip) {
-      url.searchParams.delete('skip');
-      updated = true;
-    }
-    if (updated) {
-      window.history.replaceState({}, '', url);
-    }
+    });
   });
 
-  const onsubmit = async (data: FormValue<typeof login>) => {
-    let ret = await passwordLogin(data.email, data.password);
+  const loginSuccess = (user: string) => {
+    setTimeout(async () => {
+      connectWebsocket(user);
+      await invalidate('/api/user/info');
+      await goto('/');
+    });
+  };
 
-    if (ret === RequestError.Unauthorized) {
-      return { error: 'Invalid email or password.' };
-    } else if (ret === RequestError.TooManyRequests) {
+  const onsubmit = async (formData: FormValue<typeof login>) => {
+    let encrypt = getEncrypt();
+    if (!encrypt) {
+      return {
+        error: 'Encryption function not available. Please try again later.'
+      };
+    }
+
+    let ret = await authenticate({
+      body: {
+        email: formData.email,
+        password: encrypt.encrypt(formData.password) || ''
+      }
+    });
+
+    if (!ret.data && ret.response?.status === 401) {
+      return {
+        error: 'Invalid email or password.',
+        field: 'password'
+      } as const;
+    } else if (!ret.data && ret.response?.status === 429) {
       return { error: 'Rate limit exceeded. Please try again later.' };
-    } else if (typeof ret !== 'object') {
+    } else if (!ret.data) {
       return { error: 'Login failed. Please try again.' };
     } else {
-      setTimeout(() => {
-        invalidate('/api/user/info');
-        connectWebsocket(ret.user);
-        goto('/');
-      });
+      loginSuccess((ret.data as { user: string }).user);
     }
   };
 </script>
@@ -77,7 +83,7 @@
       >
     </Card.Header>
     <Card.Content>
-      <BaseForm schema={login} {onsubmit}>
+      <BaseForm schema={login} {onsubmit} bind:isLoading submitText="Login">
         {#snippet children({ props })}
           <FormInput
             {...props}
@@ -92,35 +98,50 @@
             placeholder="Your password"
             key="password"
           >
-            {#if data.config?.mail_enabled}
+            {#if config?.mail_enabled}
               <a
                 href="/password/forgot"
                 class="ms-auto inline-block text-sm underline"
+                tabindex="-1"
               >
                 Forgot your password?
               </a>
             {/if}
           </FormInputPassword>
         {/snippet}
-        {#snippet footer({ defaultBtn })}
-          {@render defaultBtn({ content: 'Login' })}
-        {/snippet}
       </BaseForm>
-      {#if data.config?.sso_type !== SSOType.None}
+      {#if config?.sso_type !== SsoType.NONE}
         <FieldSeparator
           class="*:data-[slot=field-separator-content]:bg-card my-4"
           >Or continue with</FieldSeparator
         >
         <Button
-          variant="outline"
           class="w-full cursor-pointer"
-          onclick={() => {
-            if (!data.oidc_url) {
+          variant={oidcError ? 'destructive' : 'outline'}
+          onclick={async () => {
+            if (oidcError) {
+              isLoading = true;
+              oidcError = false;
+              oidcUrl = await getOidcUrl();
+              isLoading = false;
+            }
+
+            if (!oidcUrl) {
               toast.error('Failed to get OIDC URL.');
+              oidcError = true;
               return;
             }
-            window.location.href = data.oidc_url;
-          }}>OIDC Provider</Button
+            window.location.href = oidcUrl;
+          }}
+        >
+          {#if isLoading}
+            <Spinner />
+          {:else if oidcError}
+            <RotateCcw />
+          {:else}
+            <KeyRound />
+          {/if}
+          {oidcError ? 'Retry OIDC' : 'OIDC Provider'}</Button
         >
       {/if}
     </Card.Content>

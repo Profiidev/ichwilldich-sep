@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { StageProps } from '$lib/components/form/types.svelte';
-  import BaseForm from 'positron-components/components/form/base-form.svelte';
+  import type { StageProps } from '@profidev/pleiades/components/form/types';
+  import BaseForm from '@profidev/pleiades/components/form/base-form.svelte';
   import { databaseSetupSchema } from './schema.svelte';
-  import FormCheckbox from '$lib/components/form/FormCheckbox.svelte';
-  import * as Alert from 'positron-components/components/ui/alert';
+  import FormCheckbox from '@profidev/pleiades/components/form/form-checkbox.svelte';
+  import * as Alert from '@profidev/pleiades/components/ui/alert';
   import AlertCircle from '@lucide/svelte/icons/alert-circle';
 
   let {
@@ -28,6 +28,7 @@
   {initialValue}
   {footer}
   bind:isLoading
+  bind:this={form}
   schema={databaseSetupSchema}
 >
   {#snippet children({ props })}

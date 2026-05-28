@@ -41,6 +41,7 @@ pub struct Config {
   pub oidc: UserSettings,
 
   pub db_url: String,
+  pub admin_group: String,
 }
 
 impl Default for Config {
@@ -52,6 +53,7 @@ impl Default for Config {
       mail: MailSettings::default(),
       oidc: UserSettings::default(),
       db_url: "".to_string(),
+      admin_group: "Admin".to_string(),
       metrics: MetricsConfig {
         metrics_name: "Ichwilldich SEP".to_string(),
         ..Default::default()
